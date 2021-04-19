@@ -102,3 +102,62 @@ goToSlide(curSlide)
 ```
 
 At this point the slider is working. It is still missing the keyboard movement and the dot movers which are done next.
+
+Will start by applying an event handler to a keyboard event so the slider can be slid through using the left and right arrow keys.
+```JavaScript
+document.addEventListener("keydown", function (e) {
+    if(e.key === 'ArrowLeft') prevSlide();
+    e.key === 'ArrowRight' && nextSlide();
+});
+```
+
+Now the dots. . .
+There is an HTML div for the dots with class dots which is empty. Start by selecting that element and then creating the dots which will fill it. The dots are using the data-slide attribute with the number of the slide that clicking the button will go to. 
+
+Now create one element for each of the slides by looping over them and using a forEach() loop using insertAdjacentHTML beforeend which adds the eement as the last child. The index value will be read dynamically and move to that slide depending on when its corresponding dot is clicked. 
+```JavaScript
+const dotContainer = document.querySelector(".dots");
+
+const createDots = function () {
+    slides.forEach(function (_, i){
+        dotContainer.insertAdjacentHTML('beforeend', `<button class="dots__dot" data-slide="${i}"></button>`)
+    })
+};
+createDots();
+```
+
+The dots are now formed on the bottom of the slider. Now to make them work by adding another event handler. We will use event delegation so that we will not have to attach an event handler to each dot but instead to the parent of all which is the dot container where the dots were added. Make note to recall that all custom data attributes (like data-slide) are in the dataset.
+```JavaScript
+dotContainer.addEventListener("click", function (e) {
+  if (e.target.classList.contains("dots__dot")) {
+    const { slide } = e.target.dataset;
+    goToSlide(slide);
+  }
+});
+```
+
+Now need to show which is the current slide by giving the active dot its own class. To activate one first will deactivate all each time a slide is selected then readd it to the active slide. 
+```JavaScript
+const activateDot = function (slide) {
+  document
+    .querySelectorAll(".dots__dot")
+    .forEach((dot) => dot.classList.remove("dots__dot--active"));
+    
+        document.querySelector(`.dots__dot[data-slide="${slide}"]`).classList.add('dots__dot--active');
+};
+```
+
+That removes all the active classes. Now to add on the one that is currently active is done using the data-attribute tag. To select the active slide we use the data-attribute which is selected on using a selector [data-slide="${slide}] which will select the dot. Once selected then adding the active classlist is done.  activateDot(slide); must be added to the cur slide, prev slide, and dots container.
+```JavaScript
+const activateDot = function (slide) {
+  document
+    .querySelectorAll(".dots__dot")
+    .forEach((dot) => dot.classList.remove("dots__dot--active"));
+    
+        document.querySelector(`.dots__dot[data-slide="${slide}"]`).classList.add('dots__dot--active');
+};
+```
+
+The last issue is that on page reload none of the slides are active. So the activateDot() function needs to be called with 0 as the argument.
+
+***End walkthrough
